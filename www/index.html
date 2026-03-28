@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<title>Scènes Paris</title>
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --card: #16161a;
+    --card2: #1e1e24;
+    --border: #2a2a35;
+    --text: #f0eff4;
+    --text2: #9a99a8;
+    --accent: #e8c96b;
+    --cat1: #e8c96b;
+    --cat2: #5b9cf6;
+    --cat3: #f05a7e;
+    --cat4: #a78bfa;
+    --radius: 14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html {
+    height: 100%;
+    background: var(--card);
+  }
+
+  body {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+    font-family: 'Georgia', serif;
+    background: var(--card);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  #header {
+    background: var(--card);
+    padding: calc(var(--safe-top) + 14px) 16px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  #header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  #app-title { font-size: 22px; font-weight: 700; color: var(--text); }
+  #app-title span { color: var(--accent); }
+
+  #lang-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  #search-wrap { position: relative; margin-bottom: 10px; }
+  #search-input {
+    width: 100%;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 36px 9px 14px;
+    color: var(--text);
+    font-size: 15px;
+    outline: none;
+    font-family: inherit;
+    -webkit-appearance: none;
+  }
+  #search-input::placeholder { color: var(--text2); }
+  #search-clear {
+    position: absolute; right: 10px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    color: var(--text2); font-size: 18px;
+    cursor: pointer; display: none; line-height: 1;
+  }
+
+  #filters {
+    display: flex; gap: 7px;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  #filters::-webkit-scrollbar { display: none; }
+  .filter-btn {
+    flex-shrink: 0;
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px; color: var(--text2);
+    cursor: pointer; font-family: inherit; white-space: nowrap;
+  }
+  .filter-btn.active { color: var(--bg); font-weight: 700; }
+  .filter-btn[data-cat="all"].active { background: var(--accent); border-color: var(--accent); }
+  .filter-btn[data-cat="1"].active   { background: var(--cat1);   border-color: var(--cat1); }
+  .filter-btn[data-cat="2"].active   { background: var(--cat2);   border-color: var(--cat2); }
+  .filter-btn[data-cat="3"].active   { background: var(--cat3);   border-color: var(--cat3); }
+  .filter-btn[data-cat="4"].active   { background: var(--cat4);   border-color: var(--cat4); }
+
+  /* ── LISTE ── */
+  #list-container {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 12px calc(var(--safe-bottom) + 20px);
+  }
+
+  #count-bar { font-size: 12px; color: var(--text2); padding: 0 4px 8px; }
+
+  .cat-section { margin-bottom: 20px; }
+  .cat-title {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    padding: 4px 4px 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .cat-title .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  .salle-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 13px 15px; margin-bottom: 8px;
+    cursor: pointer; display: flex; align-items: center; gap: 12px;
+  }
+  .salle-card:active { background: var(--card2); }
+
+  .salle-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .salle-info { flex: 1; min-width: 0; }
+  .salle-name {
+    font-size: 15px; font-weight: 700;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .salle-sub {
+    font-size: 12px; color: var(--text2); margin-top: 3px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .salle-capa { font-size: 12px; font-weight: 700; color: var(--text2); flex-shrink: 0; }
+
+  #empty-state { display: none; text-align: center; padding: 60px 20px; color: var(--text2); font-size: 15px; }
+  #empty-state.visible { display: block; }
+
+  /* ── MODAL DÉTAIL ── */
+  #modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    bottom: calc(-1 * var(--safe-bottom));
+    background: rgba(0,0,0,0.7);
+    z-index: 500; display: none; align-items: flex-end;
+  }
+  #modal-overlay.open { display: flex; }
+  #modal {
+    background: var(--card);
+    border-top-left-radius: 20px; border-top-right-radius: 20px;
+    width: 100%; max-height: 80vh;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(var(--safe-bottom) + 20px);
+  }
+  #modal-handle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 0 10px;
+    cursor: pointer;
+  }
+  #modal-handle::after {
+    content: '';
+    width: 38px; height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    display: block;
+  }
+  #modal-header {
+    padding: 16px 20px 12px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  #modal-icon {
+    width: 52px; height: 52px; border-radius: 12px;
+    font-size: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  #modal-name { font-size: 19px; font-weight: 700; line-height: 1.2; }
+  #modal-arr  { font-size: 13px; color: var(--text2); margin-top: 3px; }
+  #modal-body { padding: 0 20px; }
+  .modal-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+  }
+  .modal-row:last-child { border-bottom: none; }
+  .modal-row-label { color: var(--text2); width: 90px; flex-shrink: 0; font-size: 13px; padding-top: 1px; }
+  .modal-row-value { flex: 1; line-height: 1.4; }
+  .capa-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 13px; font-weight: 700; color: #0d0d0f;
+  }
+  .cat-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 12px; font-weight: 700;
+  }
+  #modal-btn-site {
+    display: block; margin: 14px 20px 8px;
+    border: none; border-radius: 12px; padding: 13px;
+    text-align: center; font-size: 15px; font-weight: 700;
+    font-family: inherit; cursor: pointer; text-decoration: none; color: #0d0d0f;
+  }
+  #modal-btn-plans {
+    display: block; margin: 0 20px;
+    background: var(--card2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 12px; padding: 13px;
+    text-align: center; font-size: 15px; font-weight: 700;
+    font-family: inherit; cursor: pointer; text-decoration: none;
+  }
+
+  /* ── MODAL NOS APPS ── */
+  #modal-apps-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    bottom: calc(-1 * var(--safe-bottom));
+    background: rgba(0,0,0,0.75);
+    z-index: 600; display: none; align-items: flex-end;
+  }
+  #modal-apps-overlay.open { display: flex; }
+  #modal-apps {
+    background: var(--card);
+    border-top-left-radius: 20px; border-top-right-radius: 20px;
+    width: 100%; padding-bottom: calc(var(--safe-bottom) + 20px);
+  }
+  #modal-apps-handle {
+    width: 38px; height: 4px; background: var(--border);
+    border-radius: 2px; margin: 12px auto 8px;
+  }
+  #modal-apps h2 {
+    text-align: center; font-size: 16px; font-weight: 700;
+    padding: 4px 20px 14px; border-bottom: 1px solid var(--border);
+  }
+  .app-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 13px 20px; border-bottom: 1px solid var(--border); cursor: pointer;
+  }
+  .app-row:last-child { border-bottom: none; }
+  .app-row-icon {
+    width: 50px; height: 50px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0; border: 1px solid var(--border);
+  }
+  .app-row-info { flex: 1; }
+  .app-row-name { font-size: 15px; font-weight: 700; }
+  .app-row-desc { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .app-row-arrow { color: var(--text2); font-size: 20px; }
+
+  /* ── BOTTOM NAV ── */
+  #bottom-nav {
+    flex-shrink: 0;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding-bottom: var(--safe-bottom);
+  }
+  .nav-btn {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 3px;
+    background: none; border: none; cursor: pointer;
+    color: var(--text2); font-family: inherit; padding: 10px 0; font-size: 10px;
+  }
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn svg { width: 22px; height: 22px; fill: currentColor; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div id="header-top">
+    <div id="app-title">Scènes <span>Paris</span></div>
+    <button id="lang-btn" onclick="toggleLang()">🇬🇧</button>
+  </div>
+  <div id="search-wrap">
+    <input type="search" id="search-input" placeholder="Rechercher une salle…"
+           oninput="onSearch(this.value)" autocomplete="off" autocorrect="off" spellcheck="false"/>
+    <button id="search-clear" onclick="clearSearch()">✕</button>
+  </div>
+  <div id="filters">
+    <button class="filter-btn active" data-cat="all" onclick="setFilter('all')">Toutes</button>
+    <button class="filter-btn" data-cat="1" onclick="setFilter('1')">🥇 Arenas</button>
+    <button class="filter-btn" data-cat="2" onclick="setFilter('2')">🎶 Grandes</button>
+    <button class="filter-btn" data-cat="3" onclick="setFilter('3')">🎤 Mythiques</button>
+    <button class="filter-btn" data-cat="4" onclick="setFilter('4')">🎭 Classiques</button>
+  </div>
+</div>
+
+<div id="list-container">
+  <div id="count-bar"></div>
+  <div id="salle-list"></div>
+  <div id="empty-state">Aucune salle trouvée</div>
+</div>
+
+<div id="bottom-nav">
+  <button class="nav-btn active">
+    <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+    <span id="nav-label-list">Liste</span>
+  </button>
+  <button class="nav-btn" onclick="openAppsModal()">
+    <svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+    <span id="nav-label-apps">Nos apps</span>
+  </button>
+</div>
+
+<!-- MODAL DÉTAIL -->
+<div id="modal-overlay" onclick="maybeCloseModal(event)">
+  <div id="modal">
+    <div id="modal-handle" onclick="closeModalHandle()"></div>
+    <div id="modal-header">
+      <div id="modal-icon"></div>
+      <div><div id="modal-name"></div><div id="modal-arr"></div></div>
+    </div>
+    <div id="modal-body"></div>
+    <a id="modal-btn-site" href="#" target="_blank"></a>
+    <a id="modal-btn-plans" href="#" target="_blank"></a>
+  </div>
+</div>
+
+<!-- MODAL NOS APPS -->
+<div id="modal-apps-overlay" onclick="maybeCloseApps(event)">
+  <div id="modal-apps">
+    <div id="modal-apps-handle"></div>
+    <h2 id="apps-title">Nos autres apps</h2>
+    <div id="apps-list"></div>
+    <div style="text-align:center;padding:16px 20px 4px;font-size:11px;color:var(--text2);line-height:1.6;">© Michel Garlandat 2026<br>Fait avec Anthropic Claude · Version 1.0</div>
+  </div>
+</div>
+
+<script>
+const SALLES = [
+  { id:1,  cat:1, icon:"🏟️", arr:"Puteaux (92)",             capa:40000,
+    fr:{ nom:"Paris La Défense Arena", type:"Arena polyvalente",      desc:"La plus grande salle de concert couverte de France, anciennement U Arena." },
+    en:{ nom:"Paris La Défense Arena", type:"Multipurpose arena",     desc:"The largest indoor concert venue in France, formerly U Arena." },
+    adresse:"Esplanade de La Défense, 92800 Puteaux",
+    site:"https://www.parisladefense-arena.com", plans:"https://www.parisladefense-arena.com" },
+
+  { id:2,  cat:1, icon:"🏟️", arr:"Paris 12e",                capa:20000,
+    fr:{ nom:"Accor Arena",            type:"Arena polyvalente",      desc:"Ex-Palais Omnisports de Paris-Bercy, salle iconique du 12e." },
+    en:{ nom:"Accor Arena",            type:"Multipurpose arena",     desc:"Formerly Palais Omnisports de Paris-Bercy, iconic venue." },
+    adresse:"8 Bd de Bercy, 75012 Paris",
+    site:"https://www.accorarena.com", plans:"https://www.accorarena.com" },
+
+  { id:3,  cat:1, icon:"🎪", arr:"Paris 19e",                 capa:6300,
+    fr:{ nom:"Zénith Paris – La Villette", type:"Salle de spectacle", desc:"Salle mythique de La Villette, incontournable pour les concerts pop-rock." },
+    en:{ nom:"Zénith Paris – La Villette", type:"Concert hall",       desc:"Iconic La Villette venue, a must for pop-rock concerts." },
+    adresse:"211 Av. Jean Jaurès, 75019 Paris",
+    site:"https://www.zenith-paris.com", plans:"https://www.zenith-paris.com" },
+
+  { id:4,  cat:2, icon:"🎵", arr:"Boulogne-Billancourt (92)", capa:6000,
+    fr:{ nom:"La Seine Musicale",      type:"Salle de spectacle",     desc:"Salle moderne sur l'île Seguin, architecture spectaculaire." },
+    en:{ nom:"La Seine Musicale",      type:"Concert hall",           desc:"Modern venue on the Île Seguin with spectacular architecture." },
+    adresse:"Île Seguin, 92100 Boulogne-Billancourt",
+    site:"https://www.laseinemusicale.com", plans:"https://www.laseinemusicale.com" },
+
+  { id:5,  cat:2, icon:"🎬", arr:"Paris 2e",                  capa:2700,
+    fr:{ nom:"Le Grand Rex",           type:"Cinéma / Spectacles",    desc:"Le plus grand cinéma d'Europe, aussi salle de spectacles et concerts." },
+    en:{ nom:"Le Grand Rex",           type:"Cinema / Shows",         desc:"The largest cinema in Europe, also a live performance and concert venue." },
+    adresse:"1 Bd Poissonnière, 75002 Paris",
+    site:"https://www.legrandrex.com", plans:"https://www.legrandrex.com" },
+
+  { id:6,  cat:2, icon:"🎻", arr:"Paris 8e",                  capa:1900,
+    fr:{ nom:"Salle Pleyel",           type:"Concert classique",      desc:"Grande salle de concert dans le 8e, rénovée en 2006." },
+    en:{ nom:"Salle Pleyel",           type:"Classical concert hall", desc:"Prestigious classical concert hall in the 8th, renovated in 2006." },
+    adresse:"252 Rue du Faubourg Saint-Honoré, 75008 Paris",
+    site:"https://www.sallepleyel.com", plans:"https://www.sallepleyel.com" },
+
+  { id:7,  cat:3, icon:"⭐", arr:"Paris 9e",                  capa:2000,
+    fr:{ nom:"L'Olympia",              type:"Salle de concert",       desc:"La salle de concert la plus mythique de Paris, boulevard des Capucines." },
+    en:{ nom:"L'Olympia",             type:"Concert hall",           desc:"Paris's most legendary concert hall, on the Boulevard des Capucines." },
+    adresse:"28 Bd des Capucines, 75009 Paris",
+    site:"https://www.olympiahall.com", plans:"https://www.olympiahall.com" },
+
+  { id:8,  cat:3, icon:"🎸", arr:"Paris 11e",                 capa:1500,
+    fr:{ nom:"Le Bataclan",            type:"Salle de concert rock",  desc:"Salle emblématique du 11e, symbole de résilience parisienne." },
+    en:{ nom:"Le Bataclan",            type:"Rock concert hall",      desc:"Emblematic hall in the 11th, symbol of Parisian resilience." },
+    adresse:"50 Bd Voltaire, 75011 Paris",
+    site:"https://www.bataclan.fr", plans:"https://www.bataclan.fr" },
+
+  { id:9,  cat:3, icon:"🎤", arr:"Paris 18e",                 capa:1400,
+    fr:{ nom:"La Cigale",              type:"Salle de concert",       desc:"Salle mythique de Pigalle depuis 1887, programmation éclectique." },
+    en:{ nom:"La Cigale",              type:"Concert hall",           desc:"Legendary venue in Pigalle since 1887, eclectic programming." },
+    adresse:"120 Bd de Rochechouart, 75018 Paris",
+    site:"https://www.lacigale.fr", plans:"https://www.lacigale.fr" },
+
+  { id:10, cat:3, icon:"🎤", arr:"Paris 18e",                 capa:1000,
+    fr:{ nom:"Le Trianon",             type:"Salle de concert",       desc:"Salle intimiste de Montmartre, architecture Belle Époque splendide." },
+    en:{ nom:"Le Trianon",             type:"Concert hall",           desc:"Intimate Montmartre venue with splendid Belle Époque architecture." },
+    adresse:"80 Bd de Rochechouart, 75018 Paris",
+    site:"https://www.letrianon.fr", plans:"https://www.letrianon.fr" },
+
+  { id:11, cat:3, icon:"🃏", arr:"Paris 9e",                  capa:1500,
+    fr:{ nom:"Casino de Paris",        type:"Music-hall",             desc:"Grande salle de music-hall fondée en 1880, quartier de l'Opéra." },
+    en:{ nom:"Casino de Paris",        type:"Music-hall",             desc:"Grand music-hall founded in 1880, near the Opéra district." },
+    adresse:"16 Rue de Clichy, 75009 Paris",
+    site:"https://www.casinodeparis.fr", plans:"https://www.casinodeparis.fr" },
+
+  { id:12, cat:3, icon:"🪄", arr:"Paris 9e",                  capa:1600,
+    fr:{ nom:"Folies Bergère",         type:"Cabaret / Spectacles",   desc:"Scène de cabaret et de spectacle depuis 1869, icône de la vie parisienne." },
+    en:{ nom:"Folies Bergère",         type:"Cabaret / Shows",        desc:"Cabaret and show venue since 1869, a true Parisian icon." },
+    adresse:"32 Rue Richer, 75009 Paris",
+    site:"https://www.foliesbergere.com", plans:"https://www.foliesbergere.com" },
+
+  { id:13, cat:3, icon:"🎸", arr:"Paris 18e",                 capa:1500,
+    fr:{ nom:"Élysée Montmartre",      type:"Salle de concert",       desc:"Salle mythique de Montmartre, programmation rock et électro." },
+    en:{ nom:"Élysée Montmartre",      type:"Concert hall",           desc:"Iconic Montmartre concert hall, rock and electronic programming." },
+    adresse:"72 Bd de Rochechouart, 75018 Paris",
+    site:"https://www.elyseemontmartre.com", plans:"https://www.elyseemontmartre.com" },
+
+  { id:14, cat:3, icon:"💻", arr:"Paris 3e",                  capa:1200,
+    fr:{ nom:"La Gaîté Lyrique",       type:"Espace culturel",        desc:"Espace culturel du 3e dédié aux cultures numériques et musiques actuelles." },
+    en:{ nom:"La Gaîté Lyrique",       type:"Cultural space",         desc:"Cultural space in the 3rd dedicated to digital arts and contemporary music." },
+    adresse:"3bis Rue Papin, 75003 Paris",
+    site:"https://gaite-lyrique.net", plans:"https://gaite-lyrique.net" },
+
+  { id:15, cat:4, icon:"🎭", arr:"Paris 12e",                 capa:2700,
+    fr:{ nom:"Opéra Bastille",         type:"Opéra",                  desc:"Opéra national inauguré en 1989, place de la Bastille." },
+    en:{ nom:"Opéra Bastille",         type:"Opera",                  desc:"National opera house opened in 1989, Place de la Bastille." },
+    adresse:"Pl. de la Bastille, 75012 Paris",
+    site:"https://www.operadeparis.fr", plans:"https://www.operadeparis.fr" },
+
+  { id:16, cat:4, icon:"👑", arr:"Paris 9e",                  capa:1900,
+    fr:{ nom:"Opéra Garnier",          type:"Opéra / Ballet",         desc:"Le Palais Garnier, chef-d'œuvre de l'architecture du Second Empire." },
+    en:{ nom:"Opéra Garnier",          type:"Opera / Ballet",         desc:"Palais Garnier, masterpiece of Second Empire architecture." },
+    adresse:"Pl. de l'Opéra, 75009 Paris",
+    site:"https://www.operadeparis.fr", plans:"https://www.operadeparis.fr" },
+
+  { id:17, cat:4, icon:"🎼", arr:"Paris 19e",                 capa:2400,
+    fr:{ nom:"Philharmonie de Paris",  type:"Concert classique",      desc:"Grande salle de concert classique de La Villette, inaugurée en 2015." },
+    en:{ nom:"Philharmonie de Paris",  type:"Classical concert hall", desc:"Major classical concert hall in La Villette, opened in 2015." },
+    adresse:"221 Av. Jean Jaurès, 75019 Paris",
+    site:"https://philharmoniedeparis.fr", plans:"https://philharmoniedeparis.fr" },
+
+  { id:18, cat:4, icon:"🎭", arr:"Paris 1er",                 capa:2000,
+    fr:{ nom:"Théâtre du Châtelet",    type:"Théâtre lyrique",        desc:"Grand théâtre municipal, opéras, comédies musicales et concerts." },
+    en:{ nom:"Théâtre du Châtelet",    type:"Lyric theatre",          desc:"Grand municipal theatre, operas, musicals and concerts." },
+    adresse:"1 Pl. du Châtelet, 75001 Paris",
+    site:"https://www.chatelet.com", plans:"https://www.chatelet.com" },
+
+  { id:19, cat:4, icon:"💃", arr:"Paris 4e",                  capa:1000,
+    fr:{ nom:"Théâtre de la Ville",    type:"Théâtre / Danse",        desc:"Scène nationale parisienne, danse et théâtre contemporains." },
+    en:{ nom:"Théâtre de la Ville",    type:"Theatre / Dance",        desc:"Parisian national stage for contemporary dance and theatre." },
+    adresse:"2 Pl. du Châtelet, 75004 Paris",
+    site:"https://www.theatredelaville-paris.com", plans:"https://www.theatredelaville-paris.com" },
+
+  { id:20, cat:2, icon:"🎪", arr:"Paris 15e",                 capa:5100,
+    fr:{ nom:"Dôme de Paris",          type:"Salle polyvalente",      desc:"Anciennement Palais des Sports (1960), dôme légendaire de la Porte de Versailles, salle de prédilection de Johnny Hallyday." },
+    en:{ nom:"Dôme de Paris",          type:"Multipurpose venue",     desc:"Formerly Palais des Sports (1960), legendary dome at Porte de Versailles, Johnny Hallyday's favourite stage." },
+    adresse:"34 Bd Victor, 75015 Paris",
+    site:"https://www.ledomedeparis.com", plans:"https://www.ledomedeparis.com" },
+
+  { id:21, cat:4, icon:"🎹", arr:"Paris 8e",                  capa:1000,
+    fr:{ nom:"Salle Gaveau",           type:"Concert classique",      desc:"Salle de concert Art Déco du 8e, acoustique remarquable pour la musique de chambre." },
+    en:{ nom:"Salle Gaveau",           type:"Classical concert hall", desc:"Art Deco concert hall in the 8th, remarkable acoustics for chamber music." },
+    adresse:"45 Rue La Boétie, 75008 Paris",
+    site:"https://www.sallegaveau.com", plans:"https://www.sallegaveau.com" },
+
+  { id:22, cat:4, icon:"🎻", arr:"Paris 8e",                  capa:1900,
+    fr:{ nom:"Théâtre des Champs-Élysées", type:"Théâtre lyrique",   desc:"Temple de la musique classique et de la danse dans le 8e, inauguré en 1913." },
+    en:{ nom:"Théâtre des Champs-Élysées", type:"Lyric theatre",     desc:"Temple of classical music and dance in the 8th, opened in 1913." },
+    adresse:"15 Av. Montaigne, 75008 Paris",
+    site:"https://www.theatrechampselysees.fr", plans:"https://www.theatrechampselysees.fr" },
+
+  { id:23, cat:4, icon:"🎭", arr:"Paris 2e",                  capa:1200,
+    fr:{ nom:"Opéra Comique",          type:"Opéra / Opérette",      desc:"Salle Favart, l'une des plus anciennes scènes lyriques de Paris depuis 1714." },
+    en:{ nom:"Opéra Comique",          type:"Opera / Operetta",      desc:"Salle Favart, one of the oldest lyric stages in Paris since 1714." },
+    adresse:"Pl. Boieldieu, 75002 Paris",
+    site:"https://www.opera-comique.com", plans:"https://www.opera-comique.com" }
+];
+
+const CATS = {
+  1: { fr:"🥇 Très grandes arenas",   en:"🥇 Major arenas",    color:"#e8c96b" },
+  2: { fr:"🎶 Grandes salles",         en:"🎶 Large venues",    color:"#5b9cf6" },
+  3: { fr:"🎤 Salles mythiques",       en:"🎤 Iconic halls",    color:"#f05a7e" },
+  4: { fr:"🎭 Classiques & lyriques", en:"🎭 Classical",       color:"#a78bfa" }
+};
+
+const NOS_APPS = [
+  { icon:"🍷", bg:"#3d1a1a", fr:["Cave Manager",     "Gérez votre cave à vin"],      en:["Cave Manager",     "Manage your wine cellar"],    url:"https://apps.apple.com/app/id6478837462" },
+  { icon:"💊", bg:"#1a2d3d", fr:["MediManager",      "Suivi de vos médicaments"],    en:["MediManager",      "Track your medications"],      url:"https://apps.apple.com/app/id6476972965" },
+  { icon:"⚰️", bg:"#1a1a2d", fr:["Cimetières Paris", "Guide des cimetières"],        en:["Paris Cemeteries", "Paris cemeteries guide"],      url:"https://apps.apple.com/app/id6738601726" },
+  { icon:"🏛️", bg:"#1a2d1a", fr:["Musées Paris",     "Guide des musées de Paris"],   en:["Paris Museums",    "Paris museums guide"],         url:"https://apps.apple.com/app/id6743158361" },
+  { icon:"🍽️", bg:"#2d1a1a", fr:["MesRestaurants",  "Vos restaurants favoris"],     en:["MesRestaurants",   "Your favorite restaurants"],   url:"https://apps.apple.com/app/id6504267617" },
+  { icon:"🥦", bg:"#1a2d1a", fr:["Frigo Manager",    "Anti-gaspillage alimentaire"], en:["Frigo Manager",    "Food waste prevention"],       url:"https://apps.apple.com/app/id1234567890" },
+  { icon:"🎭", bg:"#2d1a2d", fr:["Théâtres Paris",  "Guide des théâtres parisiens"], en:["Paris Theatres",  "Paris theatres guide"],         url:"https://apps.apple.com/app/id6478837462" }
+];
+
+let lang   = localStorage.getItem('sp_lang') || 'fr';
+let filter = 'all';
+let query  = '';
+let activeSalle = null;
+
+document.addEventListener('DOMContentLoaded', () => { applyLang(); render(); });
+
+function toggleLang() {
+  lang = lang === 'fr' ? 'en' : 'fr';
+  localStorage.setItem('sp_lang', lang);
+  applyLang(); render();
+  if (activeSalle !== null) openModal(activeSalle);
+}
+
+function applyLang() {
+  document.getElementById('lang-btn').textContent = lang === 'fr' ? '🇬🇧' : '🇫🇷';
+  document.getElementById('search-input').placeholder = lang === 'fr' ? 'Rechercher une salle…' : 'Search a venue…';
+  document.getElementById('nav-label-list').textContent = lang === 'fr' ? 'Liste' : 'List';
+  document.getElementById('nav-label-apps').textContent = lang === 'fr' ? 'Nos apps' : 'Our apps';
+  document.getElementById('apps-title').textContent = lang === 'fr' ? 'Nos autres apps' : 'Our other apps';
+  const labels = {
+    all:{ fr:'Toutes', en:'All' }, 1:{ fr:'🥇 Arenas', en:'🥇 Arenas' },
+    2:{ fr:'🎶 Grandes', en:'🎶 Large' }, 3:{ fr:'🎤 Mythiques', en:'🎤 Iconic' },
+    4:{ fr:'🎭 Classiques', en:'🎭 Classical' }
+  };
+  document.querySelectorAll('.filter-btn').forEach(b => { b.textContent = labels[b.dataset.cat][lang]; });
+}
+
+function setFilter(cat) {
+  filter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+  render();
+}
+
+function onSearch(val) {
+  query = val;
+  document.getElementById('search-clear').style.display = val ? 'block' : 'none';
+  render();
+}
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  onSearch('');
+}
+
+function norm(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+
+function getFiltered() {
+  let list = SALLES;
+  if (filter !== 'all') list = list.filter(s => s.cat === parseInt(filter));
+  if (query.trim()) {
+    const q = norm(query.trim());
+    list = list.filter(s => norm(s[lang].nom).includes(q) || norm(s.arr).includes(q) || norm(s[lang].type).includes(q));
+  }
+  return list;
+}
+
+function capaStr(n) {
+  return n.toLocaleString('fr-FR') + ' pl.';
+}
+
+function render() {
+  const filtered = getFiltered();
+  const listEl = document.getElementById('salle-list');
+  const empty  = document.getElementById('empty-state');
+  const count  = document.getElementById('count-bar');
+
+  if (!filtered.length) {
+    listEl.innerHTML = '';
+    empty.classList.add('visible');
+    empty.textContent = lang === 'fr' ? 'Aucune salle trouvée' : 'No venue found';
+    count.textContent = '';
+    return;
+  }
+  empty.classList.remove('visible');
+  count.textContent = lang === 'fr'
+    ? `${filtered.length} salle${filtered.length > 1 ? 's' : ''}`
+    : `${filtered.length} venue${filtered.length > 1 ? 's' : ''}`;
+
+  const grouped = {};
+  filtered.forEach(s => { (grouped[s.cat] = grouped[s.cat] || []).push(s); });
+
+  let html = '';
+  [1,2,3,4].forEach(cat => {
+    if (!grouped[cat]) return;
+    const c = CATS[cat];
+    html += `<div class="cat-section">
+      <div class="cat-title" style="color:${c.color}">
+        <span class="dot" style="background:${c.color}"></span>${c[lang]}
+      </div>`;
+    grouped[cat].forEach(s => {
+      html += `<div class="salle-card" onclick="openModal(${s.id})">
+        <div class="salle-icon" style="background:${CATS[s.cat].color}22">${s.icon}</div>
+        <div class="salle-info">
+          <div class="salle-name">${s[lang].nom}</div>
+          <div class="salle-sub">${s[lang].type} · ${s.arr}</div>
+        </div>
+        <div class="salle-capa">~${capaStr(s.capa)}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  listEl.innerHTML = html;
+}
+
+function openModal(id) {
+  const s = SALLES.find(x => x.id === id);
+  if (!s) return;
+  activeSalle = id;
+  const color = CATS[s.cat].color;
+
+  document.getElementById('modal-icon').textContent = s.icon;
+  document.getElementById('modal-icon').style.background = color + '22';
+  document.getElementById('modal-name').textContent = s[lang].nom;
+  document.getElementById('modal-arr').textContent  = s.arr;
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-row">
+      <div class="modal-row-label">${lang==='fr'?'Capacité':'Capacity'}</div>
+      <div class="modal-row-value"><span class="capa-badge" style="background:${color}">~${s.capa.toLocaleString('fr-FR')} places</span></div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-row-label">${lang==='fr'?'Catégorie':'Category'}</div>
+      <div class="modal-row-value"><span class="cat-badge" style="background:${color}22;color:${color}">${CATS[s.cat][lang]}</span></div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-row-label">${lang==='fr'?'Type':'Type'}</div>
+      <div class="modal-row-value">${s[lang].type}</div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-row-label">${lang==='fr'?'Adresse':'Address'}</div>
+      <div class="modal-row-value">${s.adresse}</div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-row-label">${lang==='fr'?'À propos':'About'}</div>
+      <div class="modal-row-value">${s[lang].desc}</div>
+    </div>`;
+
+  const btnSite = document.getElementById('modal-btn-site');
+  btnSite.href = s.site;
+  btnSite.textContent = lang === 'fr' ? '🌐 Site officiel' : '🌐 Official website';
+  btnSite.style.background = color;
+
+  const btnPlans = document.getElementById('modal-btn-plans');
+  btnPlans.href = s.plans;
+  btnPlans.textContent = lang === 'fr' ? '🎟️ Billetterie' : '🎟️ Book tickets';
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModalHandle() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  activeSalle = null;
+}
+
+function maybeCloseModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+    activeSalle = null;
+  }
+}
+
+function openAppsModal() {
+  document.getElementById('apps-list').innerHTML = NOS_APPS.map(a => `
+    <div class="app-row" onclick="window.open('${a.url}','_blank')">
+      <div class="app-row-icon" style="background:${a.bg}">${a.icon}</div>
+      <div class="app-row-info">
+        <div class="app-row-name">${a[lang][0]}</div>
+        <div class="app-row-desc">${a[lang][1]}</div>
+      </div>
+      <div class="app-row-arrow">›</div>
+    </div>`).join('');
+  document.getElementById('modal-apps-overlay').classList.add('open');
+}
+
+function maybeCloseApps(e) {
+  if (e.target === document.getElementById('modal-apps-overlay'))
+    document.getElementById('modal-apps-overlay').classList.remove('open');
+}
+</script>
+</body>
+</html>
