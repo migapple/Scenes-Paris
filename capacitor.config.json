@@ -1,0 +1,32 @@
+{
+  "appId": "com.michel.garlandat.scenesparis",
+  "appName": "Sc\u00e8nes Paris",
+  "webDir": "www",
+  "server": {
+    "allowNavigation": [
+      "*.parisladefensearena.com",
+      "*.accorhotels-arena.com",
+      "*.zenith-paris.com",
+      "*.laseinemusicale.com",
+      "*.legrandrex.com",
+      "*.sallepleyel.fr",
+      "*.olympiahall.com",
+      "*.bataclan.fr",
+      "*.lacigale.fr",
+      "*.letrianon.fr",
+      "*.casinodeparis.fr",
+      "*.foliesbergere.com",
+      "*.elyseemontmartre.com",
+      "gaite-lyrique.net",
+      "*.operadeparis.fr",
+      "*.philharmoniedeparis.fr",
+      "*.chatelet.com",
+      "*.theatredelaville-paris.com",
+      "*.apple.com"
+    ]
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#16161a"
+  }
+}
