@@ -140,7 +140,10 @@
     width: 44px; height: 44px; border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
     font-size: 22px; flex-shrink: 0;
+    background-size: cover; background-position: center;
+    overflow: hidden;
   }
+  .salle-icon.has-photo { font-size: 0; }
   .salle-info { flex: 1; min-width: 0; }
   .salle-name {
     font-size: 15px; font-weight: 700;
@@ -212,6 +215,17 @@
     display: inline-block; padding: 3px 10px; border-radius: 20px;
     font-size: 12px; font-weight: 700;
   }
+  #modal-photo {
+    width: 100%; height: 180px; object-fit: cover;
+    display: none; background: var(--card2);
+  }
+  #modal-photo.loaded { display: block; }
+  #modal-photo-placeholder {
+    width: 100%; height: 100px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px; background: var(--card2);
+  }
+
   #modal-btn-site {
     display: block; margin: 14px 20px 8px;
     border: none; border-radius: 12px; padding: 13px;
@@ -229,8 +243,7 @@
   /* ── MODAL NOS APPS ── */
   #modal-apps-overlay {
     position: fixed;
-    top: 0; left: 0; right: 0;
-    bottom: calc(-1 * var(--safe-bottom));
+    top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0,0,0,0.75);
     z-index: 600; display: none; align-items: flex-end;
   }
@@ -238,7 +251,15 @@
   #modal-apps {
     background: var(--card);
     border-top-left-radius: 20px; border-top-right-radius: 20px;
-    width: 100%; padding-bottom: calc(var(--safe-bottom) + 20px);
+    width: 100%;
+    height: 88vh;
+    display: flex; flex-direction: column;
+    padding-bottom: calc(var(--safe-bottom) + 0px);
+  }
+  #modal-apps-header {
+    flex-shrink: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
   }
   #modal-apps-handle {
     width: 38px; height: 4px; background: var(--border);
@@ -246,22 +267,54 @@
   }
   #modal-apps h2 {
     text-align: center; font-size: 16px; font-weight: 700;
-    padding: 4px 20px 14px; border-bottom: 1px solid var(--border);
+    padding: 0 20px 4px;
+  }
+  #modal-apps-scroll {
+    flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(var(--safe-bottom) + 20px);
+  }
+  .apps-cat-title {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--accent);
+    padding: 12px 20px 4px;
   }
   .app-row {
     display: flex; align-items: center; gap: 14px;
-    padding: 13px 20px; border-bottom: 1px solid var(--border); cursor: pointer;
+    padding: 10px 20px; border-bottom: 1px solid var(--border); cursor: pointer;
   }
+  .app-row:active { background: var(--card2); }
   .app-row:last-child { border-bottom: none; }
   .app-row-icon {
     width: 50px; height: 50px; border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     font-size: 24px; flex-shrink: 0; border: 1px solid var(--border);
+    overflow: hidden; background: var(--card2);
   }
+  .app-row-icon img { width: 50px; height: 50px; border-radius: 11px; display: block; }
   .app-row-info { flex: 1; }
-  .app-row-name { font-size: 15px; font-weight: 700; }
-  .app-row-desc { font-size: 12px; color: var(--text2); margin-top: 2px; }
-  .app-row-arrow { color: var(--text2); font-size: 20px; }
+  .app-row-name { font-size: 14px; font-weight: 700; }
+  .app-row-desc { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .app-row-badge {
+    flex-shrink: 0;
+    background: var(--accent); color: #0d0d0f;
+    font-size: 11px; font-weight: 700;
+    padding: 4px 9px; border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .app-row-badge {
+    flex-shrink: 0;
+  }
+  .app-store-badge {
+    display: block;
+    background: #000; color: #fff;
+    border-radius: 7px;
+    padding: 4px 8px;
+    text-align: center;
+    line-height: 1;
+  }
+  .app-store-badge .badge-sub { font-size: 8px; letter-spacing: 0.3px; opacity: 0.85; }
+  .app-store-badge .badge-main { font-size: 13px; font-weight: 700; letter-spacing: -0.3px; }
 
   /* ── BOTTOM NAV ── */
   #bottom-nav {
@@ -314,7 +367,7 @@
     <span id="nav-label-list">Liste</span>
   </button>
   <button class="nav-btn" onclick="openAppsModal()">
-    <svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+    <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14zm-5 1c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>
     <span id="nav-label-apps">Nos apps</span>
   </button>
 </div>
@@ -323,6 +376,8 @@
 <div id="modal-overlay" onclick="maybeCloseModal(event)">
   <div id="modal">
     <div id="modal-handle" onclick="closeModalHandle()"></div>
+    <div id="modal-photo-placeholder"></div>
+    <img id="modal-photo" alt=""/>
     <div id="modal-header">
       <div id="modal-icon"></div>
       <div><div id="modal-name"></div><div id="modal-arr"></div></div>
@@ -336,153 +391,185 @@
 <!-- MODAL NOS APPS -->
 <div id="modal-apps-overlay" onclick="maybeCloseApps(event)">
   <div id="modal-apps">
-    <div id="modal-apps-handle"></div>
-    <h2 id="apps-title">Nos autres apps</h2>
-    <div id="apps-list"></div>
-    <div style="text-align:center;padding:16px 20px 4px;font-size:11px;color:var(--text2);line-height:1.6;">© Michel Garlandat 2026<br>Fait avec Anthropic Claude · Version 1.0</div>
+    <div id="modal-apps-header">
+      <div id="modal-apps-handle" onclick="document.getElementById('modal-apps-overlay').classList.remove('open')"></div>
+      <h2 id="apps-title">Nos autres apps</h2>
+    </div>
+    <div id="modal-apps-scroll">
+      <div id="apps-list"></div>
+      <div style="text-align:center;padding:16px 20px 4px;font-size:11px;color:var(--text2);line-height:1.6;">© Michel Garlandat 2026<br>Fait avec Anthropic Claude · Version 1.0</div>
+    </div>
   </div>
 </div>
 
 <script>
 const SALLES = [
-  { id:1,  cat:1, icon:"🏟️", arr:"Puteaux (92)",             capa:40000,
-    fr:{ nom:"Paris La Défense Arena", type:"Arena polyvalente",      desc:"La plus grande salle de concert couverte de France, anciennement U Arena." },
-    en:{ nom:"Paris La Défense Arena", type:"Multipurpose arena",     desc:"The largest indoor concert venue in France, formerly U Arena." },
-    adresse:"Esplanade de La Défense, 92800 Puteaux",
-    site:"https://www.parisladefense-arena.com", plans:"https://www.parisladefense-arena.com" },
+                { id:1,  cat:1, icon:"🏟️", arr:"Puteaux (92)",             capa:40000,
+                  wt:'https://upload.wikimedia.org/wikipedia/fr/thumb/f/ff/Paris_La_Défense_Arena_Mars_2022.jpeg/960px-Paris_La_Défense_Arena_Mars_2022.jpeg',
+                  fr:{ nom:"Paris La Défense Arena", type:"Arena polyvalente",      desc:"La plus grande salle de concert couverte de France, anciennement U Arena." },
+                  en:{ nom:"Paris La Défense Arena", type:"Multipurpose arena",     desc:"The largest indoor concert venue in France, formerly U Arena." },
+                  adresse:"Esplanade de La Défense, 92800 Puteaux",
+                  site:"https://www.parisladefense-arena.com", plans:"https://www.parisladefense-arena.com" },
 
-  { id:2,  cat:1, icon:"🏟️", arr:"Paris 12e",                capa:20000,
-    fr:{ nom:"Accor Arena",            type:"Arena polyvalente",      desc:"Ex-Palais Omnisports de Paris-Bercy, salle iconique du 12e." },
-    en:{ nom:"Accor Arena",            type:"Multipurpose arena",     desc:"Formerly Palais Omnisports de Paris-Bercy, iconic venue." },
-    adresse:"8 Bd de Bercy, 75012 Paris",
-    site:"https://www.accorarena.com", plans:"https://www.accorarena.com" },
+                { id:2,  cat:1, icon:"🏟️", arr:"Paris 12e",                capa:20000,
+                  wt:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Palais_Omnisports_de_Paris-Bercy_2007.jpg/960px-Palais_Omnisports_de_Paris-Bercy_2007.jpg',
 
-  { id:3,  cat:1, icon:"🎪", arr:"Paris 19e",                 capa:6300,
-    fr:{ nom:"Zénith Paris – La Villette", type:"Salle de spectacle", desc:"Salle mythique de La Villette, incontournable pour les concerts pop-rock." },
-    en:{ nom:"Zénith Paris – La Villette", type:"Concert hall",       desc:"Iconic La Villette venue, a must for pop-rock concerts." },
-    adresse:"211 Av. Jean Jaurès, 75019 Paris",
-    site:"https://www.zenith-paris.com", plans:"https://www.zenith-paris.com" },
+                  fr:{ nom:"Accor Arena",            type:"Arena polyvalente",      desc:"Ex-Palais Omnisports de Paris-Bercy, salle iconique du 12e." },
+                  en:{ nom:"Accor Arena",            type:"Multipurpose arena",     desc:"Formerly Palais Omnisports de Paris-Bercy, iconic venue." },
+                  adresse:"8 Bd de Bercy, 75012 Paris",
+                  site:"https://www.accorarena.com", plans:"https://www.accorarena.com" },
 
-  { id:4,  cat:2, icon:"🎵", arr:"Boulogne-Billancourt (92)", capa:6000,
-    fr:{ nom:"La Seine Musicale",      type:"Salle de spectacle",     desc:"Salle moderne sur l'île Seguin, architecture spectaculaire." },
-    en:{ nom:"La Seine Musicale",      type:"Concert hall",           desc:"Modern venue on the Île Seguin with spectacular architecture." },
-    adresse:"Île Seguin, 92100 Boulogne-Billancourt",
-    site:"https://www.laseinemusicale.com", plans:"https://www.laseinemusicale.com" },
+                { id:3,  cat:1, icon:"🎪", arr:"Paris 19e",                 capa:6300,
+                  wt:"https://upload.wikimedia.org/wikipedia/fr/thumb/d/dd/Zénith_Paris_La_Villette_-_Août_2024.jpeg/500px-Zénith_Paris_La_Villette_-_Août_2024.jpeg",
+                  fr:{ nom:"Zénith Paris – La Villette", type:"Salle de spectacle", desc:"Salle mythique de La Villette, incontournable pour les concerts pop-rock." },
+                  en:{ nom:"Zénith Paris – La Villette", type:"Concert hall",       desc:"Iconic La Villette venue, a must for pop-rock concerts." },
+                  adresse:"211 Av. Jean Jaurès, 75019 Paris",
+                  site:"https://www.zenith-paris.com", plans:"https://www.zenith-paris.com" },
 
-  { id:5,  cat:2, icon:"🎬", arr:"Paris 2e",                  capa:2700,
-    fr:{ nom:"Le Grand Rex",           type:"Cinéma / Spectacles",    desc:"Le plus grand cinéma d'Europe, aussi salle de spectacles et concerts." },
-    en:{ nom:"Le Grand Rex",           type:"Cinema / Shows",         desc:"The largest cinema in Europe, also a live performance and concert venue." },
-    adresse:"1 Bd Poissonnière, 75002 Paris",
-    site:"https://www.legrandrex.com", plans:"https://www.legrandrex.com" },
+                { id:4,  cat:2, icon:"🎵", arr:"Boulogne-Billancourt (92)", capa:6000,
+                  wt:"https://upload.wikimedia.org/wikipedia/fr/thumb/a/a7/La_Seine_Musicale.jpeg/960px-La_Seine_Musicale.jpeg",
+                  fr:{ nom:"La Seine Musicale",      type:"Salle de spectacle",     desc:"Salle moderne sur l'île Seguin, architecture spectaculaire." },
+                  en:{ nom:"La Seine Musicale",      type:"Concert hall",           desc:"Modern venue on the Île Seguin with spectacular architecture." },
+                  adresse:"Île Seguin, 92100 Boulogne-Billancourt",
+                  site:"https://www.laseinemusicale.com", plans:"https://www.laseinemusicale.com" },
 
-  { id:6,  cat:2, icon:"🎻", arr:"Paris 8e",                  capa:1900,
-    fr:{ nom:"Salle Pleyel",           type:"Concert classique",      desc:"Grande salle de concert dans le 8e, rénovée en 2006." },
-    en:{ nom:"Salle Pleyel",           type:"Classical concert hall", desc:"Prestigious classical concert hall in the 8th, renovated in 2006." },
-    adresse:"252 Rue du Faubourg Saint-Honoré, 75008 Paris",
-    site:"https://www.sallepleyel.com", plans:"https://www.sallepleyel.com" },
+                { id:5,  cat:2, icon:"🎬", arr:"Paris 2e",                  capa:2700,
+                  wt:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/GrandRexFacade90ans.jpg/960px-GrandRexFacade90ans.jpg',
+                  fr:{ nom:"Le Grand Rex",           type:"Cinéma / Spectacles",    desc:"Le plus grand cinéma d'Europe, aussi salle de spectacles et concerts." },
+                  en:{ nom:"Le Grand Rex",           type:"Cinema / Shows",         desc:"The largest cinema in Europe, also a live performance and concert venue." },
+                  adresse:"1 Bd Poissonnière, 75002 Paris",
+                  site:"https://www.legrandrex.com", plans:"https://www.legrandrex.com" },
 
-  { id:7,  cat:3, icon:"⭐", arr:"Paris 9e",                  capa:2000,
-    fr:{ nom:"L'Olympia",              type:"Salle de concert",       desc:"La salle de concert la plus mythique de Paris, boulevard des Capucines." },
-    en:{ nom:"L'Olympia",             type:"Concert hall",           desc:"Paris's most legendary concert hall, on the Boulevard des Capucines." },
-    adresse:"28 Bd des Capucines, 75009 Paris",
-    site:"https://www.olympiahall.com", plans:"https://www.olympiahall.com" },
+                { id:6,  cat:2, icon:"🎻", arr:"Paris 8e",                  capa:1900,
+                  wt:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Salle-Pleyel-P1000321.jpg/960px-Salle-Pleyel-P1000321.jpg',
+                  fr:{ nom:"Salle Pleyel",           type:"Concert classique",      desc:"Grande salle de concert dans le 8e, rénovée en 2006." },
+                  en:{ nom:"Salle Pleyel",           type:"Classical concert hall", desc:"Prestigious classical concert hall in the 8th, renovated in 2006." },
+                  adresse:"252 Rue du Faubourg Saint-Honoré, 75008 Paris",
+                  site:"https://www.sallepleyel.com", plans:"https://www.sallepleyel.com" },
 
-  { id:8,  cat:3, icon:"🎸", arr:"Paris 11e",                 capa:1500,
-    fr:{ nom:"Le Bataclan",            type:"Salle de concert rock",  desc:"Salle emblématique du 11e, symbole de résilience parisienne." },
-    en:{ nom:"Le Bataclan",            type:"Rock concert hall",      desc:"Emblematic hall in the 11th, symbol of Parisian resilience." },
-    adresse:"50 Bd Voltaire, 75011 Paris",
-    site:"https://www.bataclan.fr", plans:"https://www.bataclan.fr" },
+                { id:7,  cat:3, icon:"⭐", arr:"Paris 9e",                  capa:2000,
+                  wt:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/L%27Olympia_%28Paris%29_en_2010.JPG/960px-L%27Olympia_%28Paris%29_en_2010.JPG',
 
-  { id:9,  cat:3, icon:"🎤", arr:"Paris 18e",                 capa:1400,
-    fr:{ nom:"La Cigale",              type:"Salle de concert",       desc:"Salle mythique de Pigalle depuis 1887, programmation éclectique." },
-    en:{ nom:"La Cigale",              type:"Concert hall",           desc:"Legendary venue in Pigalle since 1887, eclectic programming." },
-    adresse:"120 Bd de Rochechouart, 75018 Paris",
-    site:"https://www.lacigale.fr", plans:"https://www.lacigale.fr" },
+                  fr:{ nom:"L'Olympia",              type:"Salle de concert",       desc:"La salle de concert la plus mythique de Paris, boulevard des Capucines." },
+                  en:{ nom:"L'Olympia",             type:"Concert hall",           desc:"Paris's most legendary concert hall, on the Boulevard des Capucines." },
+                  adresse:"28 Bd des Capucines, 75009 Paris",
+                  site:"https://www.olympiahall.com", plans:"https://www.olympiahall.com" },
 
-  { id:10, cat:3, icon:"🎤", arr:"Paris 18e",                 capa:1000,
-    fr:{ nom:"Le Trianon",             type:"Salle de concert",       desc:"Salle intimiste de Montmartre, architecture Belle Époque splendide." },
-    en:{ nom:"Le Trianon",             type:"Concert hall",           desc:"Intimate Montmartre venue with splendid Belle Époque architecture." },
-    adresse:"80 Bd de Rochechouart, 75018 Paris",
-    site:"https://www.letrianon.fr", plans:"https://www.letrianon.fr" },
+                { id:8,  cat:3, icon:"🎸", arr:"Paris 11e",                 capa:1500,
+                  wt:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Bataclan_-_Paris_%283448973995%29.jpg/500px-Bataclan_-_Paris_%283448973995%29.jpg",
+                  fr:{ nom:"Le Bataclan",            type:"Salle de concert rock",  desc:"Salle emblématique du 11e, symbole de résilience parisienne." },
+                  en:{ nom:"Le Bataclan",            type:"Rock concert hall",      desc:"Emblematic hall in the 11th, symbol of Parisian resilience." },
+                  adresse:"50 Bd Voltaire, 75011 Paris",
+                  site:"https://www.bataclan.fr", plans:"https://www.bataclan.fr" },
 
-  { id:11, cat:3, icon:"🃏", arr:"Paris 9e",                  capa:1500,
-    fr:{ nom:"Casino de Paris",        type:"Music-hall",             desc:"Grande salle de music-hall fondée en 1880, quartier de l'Opéra." },
-    en:{ nom:"Casino de Paris",        type:"Music-hall",             desc:"Grand music-hall founded in 1880, near the Opéra district." },
-    adresse:"16 Rue de Clichy, 75009 Paris",
-    site:"https://www.casinodeparis.fr", plans:"https://www.casinodeparis.fr" },
+                { id:9,  cat:3, icon:"🎤", arr:"Paris 18e",                 capa:1400,
+                  wt:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/La_Cigale_Paris.jpg/960px-La_Cigale_Paris.jpg',
 
-  { id:12, cat:3, icon:"🪄", arr:"Paris 9e",                  capa:1600,
-    fr:{ nom:"Folies Bergère",         type:"Cabaret / Spectacles",   desc:"Scène de cabaret et de spectacle depuis 1869, icône de la vie parisienne." },
-    en:{ nom:"Folies Bergère",         type:"Cabaret / Shows",        desc:"Cabaret and show venue since 1869, a true Parisian icon." },
-    adresse:"32 Rue Richer, 75009 Paris",
-    site:"https://www.foliesbergere.com", plans:"https://www.foliesbergere.com" },
+                  fr:{ nom:"La Cigale",              type:"Salle de concert",       desc:"Salle mythique de Pigalle depuis 1887, programmation éclectique." },
+                  en:{ nom:"La Cigale",              type:"Concert hall",           desc:"Legendary venue in Pigalle since 1887, eclectic programming." },
+                  adresse:"120 Bd de Rochechouart, 75018 Paris",
+                  site:"https://www.lacigale.fr", plans:"https://www.lacigale.fr" },
 
-  { id:13, cat:3, icon:"🎸", arr:"Paris 18e",                 capa:1500,
-    fr:{ nom:"Élysée Montmartre",      type:"Salle de concert",       desc:"Salle mythique de Montmartre, programmation rock et électro." },
-    en:{ nom:"Élysée Montmartre",      type:"Concert hall",           desc:"Iconic Montmartre concert hall, rock and electronic programming." },
-    adresse:"72 Bd de Rochechouart, 75018 Paris",
-    site:"https://www.elyseemontmartre.com", plans:"https://www.elyseemontmartre.com" },
+                { id:10, cat:3, icon:"🎤", arr:"Paris 18e",                 capa:1000,
+                  wt:'https://upload.wikimedia.org/wikipedia/commons/b/b3/Le_Trianon_Paris%2C_Fa%C3%A7ade_sur_le_boulevard_Rochechouart.jpg',
 
-  { id:14, cat:3, icon:"💻", arr:"Paris 3e",                  capa:1200,
-    fr:{ nom:"La Gaîté Lyrique",       type:"Espace culturel",        desc:"Espace culturel du 3e dédié aux cultures numériques et musiques actuelles." },
-    en:{ nom:"La Gaîté Lyrique",       type:"Cultural space",         desc:"Cultural space in the 3rd dedicated to digital arts and contemporary music." },
-    adresse:"3bis Rue Papin, 75003 Paris",
-    site:"https://gaite-lyrique.net", plans:"https://gaite-lyrique.net" },
+                  fr:{ nom:"Le Trianon",             type:"Salle de concert",       desc:"Salle intimiste de Montmartre, architecture Belle Époque splendide." },
+                  en:{ nom:"Le Trianon",             type:"Concert hall",           desc:"Intimate Montmartre venue with splendid Belle Époque architecture." },
+                  adresse:"80 Bd de Rochechouart, 75018 Paris",
+                  site:"https://www.letrianon.fr", plans:"https://www.letrianon.fr" },
 
-  { id:15, cat:4, icon:"🎭", arr:"Paris 12e",                 capa:2700,
-    fr:{ nom:"Opéra Bastille",         type:"Opéra",                  desc:"Opéra national inauguré en 1989, place de la Bastille." },
-    en:{ nom:"Opéra Bastille",         type:"Opera",                  desc:"National opera house opened in 1989, Place de la Bastille." },
-    adresse:"Pl. de la Bastille, 75012 Paris",
-    site:"https://www.operadeparis.fr", plans:"https://www.operadeparis.fr" },
+                { id:11, cat:3, icon:"🃏", arr:"Paris 9e",                  capa:1500,
+                  wt:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Casino-de-Paris.jpg/960px-Casino-de-Paris.jpg',
+                  fr:{ nom:"Casino de Paris",        type:"Music-hall",             desc:"Grande salle de music-hall fondée en 1880, quartier de l'Opéra." },
+                  en:{ nom:"Casino de Paris",        type:"Music-hall",             desc:"Grand music-hall founded in 1880, near the Opéra district." },
+                  adresse:"16 Rue de Clichy, 75009 Paris",
+                  site:"https://www.casinodeparis.fr", plans:"https://www.casinodeparis.fr" },
 
-  { id:16, cat:4, icon:"👑", arr:"Paris 9e",                  capa:1900,
-    fr:{ nom:"Opéra Garnier",          type:"Opéra / Ballet",         desc:"Le Palais Garnier, chef-d'œuvre de l'architecture du Second Empire." },
-    en:{ nom:"Opéra Garnier",          type:"Opera / Ballet",         desc:"Palais Garnier, masterpiece of Second Empire architecture." },
-    adresse:"Pl. de l'Opéra, 75009 Paris",
-    site:"https://www.operadeparis.fr", plans:"https://www.operadeparis.fr" },
+                { id:12, cat:3, icon:"🪄", arr:"Paris 9e",                  capa:1600,
+                  wt:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Folies-bergere-facade.jpg/960px-Folies-bergere-facade.jpg',
+                  fr:{ nom:"Folies Bergère",         type:"Cabaret / Spectacles",   desc:"Scène de cabaret et de spectacle depuis 1869, icône de la vie parisienne." },
+                  en:{ nom:"Folies Bergère",         type:"Cabaret / Shows",        desc:"Cabaret and show venue since 1869, a true Parisian icon." },
+                  adresse:"32 Rue Richer, 75009 Paris",
+                  site:"https://www.foliesbergere.com", plans:"https://www.foliesbergere.com" },
 
-  { id:17, cat:4, icon:"🎼", arr:"Paris 19e",                 capa:2400,
-    fr:{ nom:"Philharmonie de Paris",  type:"Concert classique",      desc:"Grande salle de concert classique de La Villette, inaugurée en 2015." },
-    en:{ nom:"Philharmonie de Paris",  type:"Classical concert hall", desc:"Major classical concert hall in La Villette, opened in 2015." },
-    adresse:"221 Av. Jean Jaurès, 75019 Paris",
-    site:"https://philharmoniedeparis.fr", plans:"https://philharmoniedeparis.fr" },
+                { id:13, cat:3, icon:"🎸", arr:"Paris 18e",                 capa:1500,
+                  wt:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/%C3%89lys%C3%A9e-Montmartre%2C_72_boulevard_de_Rochechouart%2C_Paris_18e.jpg/960px-%C3%89lys%C3%A9e-Montmartre%2C_72_boulevard_de_Rochechouart%2C_Paris_18e.jpg",
+                  fr:{ nom:"Élysée Montmartre",      type:"Salle de concert",       desc:"Salle mythique de Montmartre, programmation rock et électro." },
+                  en:{ nom:"Élysée Montmartre",      type:"Concert hall",           desc:"Iconic Montmartre concert hall, rock and electronic programming." },
+                  adresse:"72 Bd de Rochechouart, 75018 Paris",
+                  site:"https://www.elyseemontmartre.com", plans:"https://www.elyseemontmartre.com" },
 
-  { id:18, cat:4, icon:"🎭", arr:"Paris 1er",                 capa:2000,
-    fr:{ nom:"Théâtre du Châtelet",    type:"Théâtre lyrique",        desc:"Grand théâtre municipal, opéras, comédies musicales et concerts." },
-    en:{ nom:"Théâtre du Châtelet",    type:"Lyric theatre",          desc:"Grand municipal theatre, operas, musicals and concerts." },
-    adresse:"1 Pl. du Châtelet, 75001 Paris",
-    site:"https://www.chatelet.com", plans:"https://www.chatelet.com" },
+                { id:14, cat:3, icon:"💻", arr:"Paris 3e",                  capa:1200,
+                  wt:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/La_Gaîté_Lyrique_en_2021.jpg/500px-La_Gaîté_Lyrique_en_2021.jpg",
+                  fr:{ nom:"La Gaîté Lyrique",       type:"Espace culturel",        desc:"Espace culturel du 3e dédié aux cultures numériques et musiques actuelles." },
+                  en:{ nom:"La Gaîté Lyrique",       type:"Cultural space",         desc:"Cultural space in the 3rd dedicated to digital arts and contemporary music." },
+                  adresse:"3bis Rue Papin, 75003 Paris",
+                  site:"https://gaite-lyrique.net", plans:"https://gaite-lyrique.net" },
 
-  { id:19, cat:4, icon:"💃", arr:"Paris 4e",                  capa:1000,
-    fr:{ nom:"Théâtre de la Ville",    type:"Théâtre / Danse",        desc:"Scène nationale parisienne, danse et théâtre contemporains." },
-    en:{ nom:"Théâtre de la Ville",    type:"Theatre / Dance",        desc:"Parisian national stage for contemporary dance and theatre." },
-    adresse:"2 Pl. du Châtelet, 75004 Paris",
-    site:"https://www.theatredelaville-paris.com", plans:"https://www.theatredelaville-paris.com" },
+                { id:15, cat:4, icon:"🎭", arr:"Paris 12e",                 capa:2700,
+                  wt:"https://lh3.googleusercontent.com/gps-cs-s/APNQkAFyVNN0IIHqV6dHybd_DF9JHMx3MGIqWuE8i0afm1NxF_H0FqiYZQT6gHVZWxtXunkraoyu6Tr_fmwbhSUCBSca_TFnm1r1DEqogenR8zKJKRyJo9y0USA9IA07vR0d3vKd54c=s1360-w1360-h1020",
+                  fr:{ nom:"Opéra Bastille",         type:"Opéra",                  desc:"Opéra national inauguré en 1989, place de la Bastille." },
+                  en:{ nom:"Opéra Bastille",         type:"Opera",                  desc:"National opera house opened in 1989, Place de la Bastille." },
+                  adresse:"Pl. de la Bastille, 75012 Paris",
+                  site:"https://www.operadeparis.fr", plans:"https://www.operadeparis.fr" },
 
-  { id:20, cat:2, icon:"🎪", arr:"Paris 15e",                 capa:5100,
-    fr:{ nom:"Dôme de Paris",          type:"Salle polyvalente",      desc:"Anciennement Palais des Sports (1960), dôme légendaire de la Porte de Versailles, salle de prédilection de Johnny Hallyday." },
-    en:{ nom:"Dôme de Paris",          type:"Multipurpose venue",     desc:"Formerly Palais des Sports (1960), legendary dome at Porte de Versailles, Johnny Hallyday's favourite stage." },
-    adresse:"34 Bd Victor, 75015 Paris",
-    site:"https://www.ledomedeparis.com", plans:"https://www.ledomedeparis.com" },
+                { id:16, cat:4, icon:"👑", arr:"Paris 9e",                  capa:1900,
+                  wt:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Paris_Palais_Garnier_2010-04-06_16.55.07.jpg/960px-Paris_Palais_Garnier_2010-04-06_16.55.07.jpg',
 
-  { id:21, cat:4, icon:"🎹", arr:"Paris 8e",                  capa:1000,
-    fr:{ nom:"Salle Gaveau",           type:"Concert classique",      desc:"Salle de concert Art Déco du 8e, acoustique remarquable pour la musique de chambre." },
-    en:{ nom:"Salle Gaveau",           type:"Classical concert hall", desc:"Art Deco concert hall in the 8th, remarkable acoustics for chamber music." },
-    adresse:"45 Rue La Boétie, 75008 Paris",
-    site:"https://www.sallegaveau.com", plans:"https://www.sallegaveau.com" },
+                  fr:{ nom:"Opéra Garnier",          type:"Opéra / Ballet",         desc:"Le Palais Garnier, chef-d'œuvre de l'architecture du Second Empire." },
+                  en:{ nom:"Opéra Garnier",          type:"Opera / Ballet",         desc:"Palais Garnier, masterpiece of Second Empire architecture." },
+                  adresse:"Pl. de l'Opéra, 75009 Paris",
+                  site:"https://www.operadeparis.fr", plans:"https://www.operadeparis.fr" },
 
-  { id:22, cat:4, icon:"🎻", arr:"Paris 8e",                  capa:1900,
-    fr:{ nom:"Théâtre des Champs-Élysées", type:"Théâtre lyrique",   desc:"Temple de la musique classique et de la danse dans le 8e, inauguré en 1913." },
-    en:{ nom:"Théâtre des Champs-Élysées", type:"Lyric theatre",     desc:"Temple of classical music and dance in the 8th, opened in 1913." },
-    adresse:"15 Av. Montaigne, 75008 Paris",
-    site:"https://www.theatrechampselysees.fr", plans:"https://www.theatrechampselysees.fr" },
+                { id:17, cat:4, icon:"🎼", arr:"Paris 19e",                 capa:2400,
+                  wt:'https://upload.wikimedia.org/wikipedia/fr/thumb/9/9f/Philharmonie_Novembre_2022.jpeg/960px-Philharmonie_Novembre_2022.jpeg',
+                  fr:{ nom:"Philharmonie de Paris",  type:"Concert classique",      desc:"Grande salle de concert classique de La Villette, inaugurée en 2015." },
+                  en:{ nom:"Philharmonie de Paris",  type:"Classical concert hall", desc:"Major classical concert hall in La Villette, opened in 2015." },
+                  adresse:"221 Av. Jean Jaurès, 75019 Paris",
+                  site:"https://philharmoniedeparis.fr", plans:"https://philharmoniedeparis.fr" },
 
-  { id:23, cat:4, icon:"🎭", arr:"Paris 2e",                  capa:1200,
-    fr:{ nom:"Opéra Comique",          type:"Opéra / Opérette",      desc:"Salle Favart, l'une des plus anciennes scènes lyriques de Paris depuis 1714." },
-    en:{ nom:"Opéra Comique",          type:"Opera / Operetta",      desc:"Salle Favart, one of the oldest lyric stages in Paris since 1714." },
-    adresse:"Pl. Boieldieu, 75002 Paris",
-    site:"https://www.opera-comique.com", plans:"https://www.opera-comique.com" }
-];
+                { id:18, cat:4, icon:"🎭", arr:"Paris 1er",                 capa:2000,
+                  wt:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Th%C3%A9%C3%A2tre_du_Ch%C3%A2telet_Fa%C3%A7ade_%28cropped%29.jpg/960px-Th%C3%A9%C3%A2tre_du_Ch%C3%A2telet_Fa%C3%A7ade_%28cropped%29.jpg',
+                  fr:{ nom:"Théâtre du Châtelet",    type:"Théâtre lyrique",        desc:"Grand théâtre municipal, opéras, comédies musicales et concerts." },
+                  en:{ nom:"Théâtre du Châtelet",    type:"Lyric theatre",          desc:"Grand municipal theatre, operas, musicals and concerts." },
+                  adresse:"1 Pl. du Châtelet, 75001 Paris",
+                  site:"https://www.chatelet.com", plans:"https://www.chatelet.com" },
+
+                { id:19, cat:4, icon:"💃", arr:"Paris 4e",                  capa:1000,
+                  wt:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Théâtre_Sarah-Bernhardt_1.jpg/500px-Théâtre_Sarah-Bernhardt_1.jpg",
+                  fr:{ nom:"Théâtre de la Ville",    type:"Théâtre / Danse",        desc:"Scène nationale parisienne, danse et théâtre contemporains." },
+                  en:{ nom:"Théâtre de la Ville",    type:"Theatre / Dance",        desc:"Parisian national stage for contemporary dance and theatre." },
+                  adresse:"2 Pl. du Châtelet, 75004 Paris",
+                  site:"https://www.theatredelaville-paris.com", plans:"https://www.theatredelaville-paris.com" },
+
+                { id:20, cat:2, icon:"🎪", arr:"Paris 15e",                 capa:5100,
+                  wt:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Palais_des_Sports_de_Paris.jpg/960px-Palais_des_Sports_de_Paris.jpg",
+                  fr:{ nom:"Dôme de Paris",          type:"Salle polyvalente",      desc:"Anciennement Palais des Sports (1960), dôme légendaire de la Porte de Versailles, salle de prédilection de Johnny Hallyday." },
+                  en:{ nom:"Dôme de Paris",          type:"Multipurpose venue",     desc:"Formerly Palais des Sports (1960), legendary dome at Porte de Versailles, Johnny Hallyday's favourite stage." },
+                  adresse:"34 Bd Victor, 75015 Paris",
+                  site:"https://www.ledomedeparis.com", plans:"https://www.ledomedeparis.com" },
+
+                { id:21, cat:4, icon:"🎹", arr:"Paris 8e",                  capa:1000,
+                  wt:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Salle_Gaveau%2C_47_rue_La_Bo%C3%A9tie%2C_Paris_8e_3.jpg/960px-Salle_Gaveau%2C_47_rue_La_Bo%C3%A9tie%2C_Paris_8e_3.jpg',
+                  fr:{ nom:"Salle Gaveau",           type:"Concert classique",      desc:"Salle de concert Art Déco du 8e, acoustique remarquable pour la musique de chambre." },
+                  en:{ nom:"Salle Gaveau",           type:"Classical concert hall", desc:"Art Deco concert hall in the 8th, remarkable acoustics for chamber music." },
+                  adresse:"45 Rue La Boétie, 75008 Paris",
+                  site:"https://www.sallegaveau.com", plans:"https://www.sallegaveau.com" },
+
+                { id:22, cat:4, icon:"🎻", arr:"Paris 8e",                  capa:1900,
+                  wt:'https://upload.wikimedia.org/wikipedia/commons/a/ab/Le_th%C3%A9%C3%A2tre_des_Champs-%C3%89lys%C3%A9es_%C3%A0_Paris%2C_2022.jpg',
+                  fr:{ nom:"Théâtre des Champs-Élysées", type:"Théâtre lyrique",   desc:"Temple de la musique classique et de la danse dans le 8e, inauguré en 1913." },
+                  en:{ nom:"Théâtre des Champs-Élysées", type:"Lyric theatre",     desc:"Temple of classical music and dance in the 8th, opened in 1913." },
+                  adresse:"15 Av. Montaigne, 75008 Paris",
+                  site:"https://www.theatrechampselysees.fr", plans:"https://www.theatrechampselysees.fr" },
+
+                { id:23, cat:4, icon:"🎭", arr:"Paris 2e",                  capa:1200,
+                  wt:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Th%C3%A9%C3%A2tre_National_Op%C3%A9ra_Comique_-_Paris_II_%28FR75%29_-_2021-06-14_-_1.jpg/960px-Th%C3%A9%C3%A2tre_National_Op%C3%A9ra_Comique_-_Paris_II_%28FR75%29_-_2021-06-14_-_1.jpg",
+                  fr:{ nom:"Opéra Comique",          type:"Opéra / Opérette",      desc:"Salle Favart, l'une des plus anciennes scènes lyriques de Paris depuis 1714." },
+                  en:{ nom:"Opéra Comique",          type:"Opera / Operetta",      desc:"Salle Favart, one of the oldest lyric stages in Paris since 1714." },
+                  adresse:"Pl. Boieldieu, 75002 Paris",
+                  site:"https://www.opera-comique.com", plans:"https://www.opera-comique.com" }
+              ];
 
 const CATS = {
   1: { fr:"🥇 Très grandes arenas",   en:"🥇 Major arenas",    color:"#e8c96b" },
@@ -492,14 +579,145 @@ const CATS = {
 };
 
 const NOS_APPS = [
-  { icon:"🍷", bg:"#3d1a1a", fr:["Cave Manager",     "Gérez votre cave à vin"],      en:["Cave Manager",     "Manage your wine cellar"],    url:"https://apps.apple.com/app/id6478837462" },
-  { icon:"💊", bg:"#1a2d3d", fr:["MediManager",      "Suivi de vos médicaments"],    en:["MediManager",      "Track your medications"],      url:"https://apps.apple.com/app/id6476972965" },
-  { icon:"⚰️", bg:"#1a1a2d", fr:["Cimetières Paris", "Guide des cimetières"],        en:["Paris Cemeteries", "Paris cemeteries guide"],      url:"https://apps.apple.com/app/id6738601726" },
-  { icon:"🏛️", bg:"#1a2d1a", fr:["Musées Paris",     "Guide des musées de Paris"],   en:["Paris Museums",    "Paris museums guide"],         url:"https://apps.apple.com/app/id6743158361" },
-  { icon:"🍽️", bg:"#2d1a1a", fr:["MesRestaurants",  "Vos restaurants favoris"],     en:["MesRestaurants",   "Your favorite restaurants"],   url:"https://apps.apple.com/app/id6504267617" },
-  { icon:"🥦", bg:"#1a2d1a", fr:["Frigo Manager",    "Anti-gaspillage alimentaire"], en:["Frigo Manager",    "Food waste prevention"],       url:"https://apps.apple.com/app/id1234567890" },
-  { icon:"🎭", bg:"#2d1a2d", fr:["Théâtres Paris",  "Guide des théâtres parisiens"], en:["Paris Theatres",  "Paris theatres guide"],         url:"https://apps.apple.com/app/id6478837462" }
+  // Géographie
+  { id:"6770453028", bg:"#1a2d1a", fr:["France Geo Quiz",        "Quiz géographie France"],         en:["France Geo Quiz",        "French geography quiz"],          url:"https://apps.apple.com/app/id6770453028" },
+  { id:"6770458593", bg:"#1a2d1a", fr:["Europe Geo Quiz",        "Quiz géographie Europe"],         en:["Europe Geo Quiz",        "European geography quiz"],        url:"https://apps.apple.com/app/id6770458593" },
+  { id:"6770566450", bg:"#1a2d1a", fr:["Amérique Nord Geo Quiz", "Quiz géographie Amér. du Nord"],  en:["N. America Geo Quiz",    "N. American geography quiz"],     url:"https://apps.apple.com/app/id6770566450" },
+  { id:"6770580053", bg:"#1a2d1a", fr:["Amérique Sud Geo Quiz",  "Quiz géographie Amér. du Sud"],   en:["S. America Geo Quiz",    "S. American geography quiz"],     url:"https://apps.apple.com/app/id6770580053" },
+  { id:"6770836826", bg:"#1a2d1a", fr:["Afrique Geo Quiz",       "Quiz géographie Afrique"],        en:["Africa Geo Quiz",        "African geography quiz"],         url:"https://apps.apple.com/app/id6770836826" },
+  { id:"6770857576", bg:"#1a2d1a", fr:["Asie Geo Quiz",          "Quiz géographie Asie"],           en:["Asia Geo Quiz",          "Asian geography quiz"],           url:"https://apps.apple.com/app/id6770857576" },
+  { id:"6770848617", bg:"#1a2d1a", fr:["Moyen-Orient Geo Quiz",  "Quiz géographie Moyen-Orient"],   en:["Middle East Geo Quiz",   "Middle East geography quiz"],     url:"https://apps.apple.com/app/id6770848617" },
+  { id:"6770826067", bg:"#1a2d1a", fr:["Europe Hors UE Geo Quiz","Quiz pays hors Union Européenne"],en:["Non-EU Europe Quiz",     "Non-EU European countries"],      url:"https://apps.apple.com/app/id6770826067" },
+  // Histoire France
+  { id:"6761322546", bg:"#2d1a0a", fr:["Rois de France",         "Histoire des rois de France"],    en:["Kings of France",        "History of French kings"],        url:"https://apps.apple.com/app/id6761322546" },
+  { id:"6761324444", bg:"#2d1a0a", fr:["Présidents Français",    "Les présidents de la République"],en:["French Presidents",      "Presidents of the Republic"],     url:"https://apps.apple.com/app/id6761324444" },
+  { id:"6761374601", bg:"#2d1a0a", fr:["Maréchaux Napoléon",     "Les maréchaux de l'Empire"],      en:["Napoleon's Marshals",    "Marshals of the Empire"],         url:"https://apps.apple.com/app/id6761374601" },
+  { id:"6762542395", bg:"#2d1a0a", fr:["Conquêtes Sociales",     "Histoire sociale française"],     en:["Social Conquests",       "French social history"],          url:"https://apps.apple.com/app/id6762542395" },
+  { id:"6768320574", bg:"#2d1a0a", fr:["Légion d'Honneur",       "Histoire de la Légion d'honneur"],en:["Legion of Honour",       "History of the Legion of Honour"],url:"https://apps.apple.com/app/id6768320574" },
+  // Histoire Monde
+  { id:"6762208827", bg:"#1a1a2d", fr:["Dynasties Royales",      "Les grandes dynasties royales"],  en:["Royal Dynasties",        "The great royal dynasties"],      url:"https://apps.apple.com/app/id6762208827" },
+  { id:"6762522136", bg:"#1a1a2d", fr:["Dynasties Chinoises",    "Histoire des dynasties chinoises"],en:["Chinese Dynasties",     "History of Chinese dynasties"],   url:"https://apps.apple.com/app/id6762522136" },
+  { id:"6762452564", bg:"#1a1a2d", fr:["Dynasties Russes",       "Histoire des dynasties russes"],  en:["Russian Dynasties",      "History of Russian dynasties"],   url:"https://apps.apple.com/app/id6762452564" },
+  { id:"6762256169", bg:"#1a1a2d", fr:["Présidents Américains",  "Les présidents des États-Unis"],  en:["US Presidents",          "Presidents of the United States"],url:"https://apps.apple.com/app/id6762256169" },
+  { id:"6762263227", bg:"#1a1a2d", fr:["Leaders Européens",      "Dirigeants d'Europe"],            en:["European Leaders",       "Leaders of Europe"],              url:"https://apps.apple.com/app/id6762263227" },
+  { id:"6768003416", bg:"#1a1a2d", fr:["Explorateurs du Monde",  "Les grands explorateurs"],        en:["World Explorers",        "The great explorers"],            url:"https://apps.apple.com/app/id6768003416" },
+  { id:"6763569148", bg:"#1a1a2d", fr:["Nobels de la Paix",      "Les lauréats du prix Nobel"],     en:["Nobel Peace Prize",      "Nobel Peace Prize laureates"],    url:"https://apps.apple.com/app/id6763569148" },
+  // Culture
+  { id:"6768068634", bg:"#2d1a2d", fr:["Peintres Célèbres",      "Les grands peintres du monde"],   en:["Famous Painters",        "The world's great painters"],     url:"https://apps.apple.com/app/id6768068634" },
+  { id:"6770302783", bg:"#2d1a2d", fr:["Architectes Célèbres",   "Les grands architectes"],         en:["Famous Architects",      "The great architects"],           url:"https://apps.apple.com/app/id6770302783" },
+  { id:"6770102339", bg:"#2d1a2d", fr:["Athlètes Célèbres",      "Les grands sportifs du monde"],   en:["Famous Athletes",        "The world's great athletes"],     url:"https://apps.apple.com/app/id6770102339" },
+  { id:"6767135193", bg:"#2d1a2d", fr:["Auteurs de BD",          "Les maîtres de la bande dessinée"],en:["Comics Authors",        "Masters of comics"],              url:"https://apps.apple.com/app/id6767135193" },
+  { id:"6766260978", bg:"#2d1a2d", fr:["Histoire Informatique",  "Histoire de l'informatique"],     en:["History of Computing",   "History of computing"],           url:"https://apps.apple.com/app/id6766260978" },
+  { id:"6766261703", bg:"#2d1a2d", fr:["Micro-Informatique",     "Histoire de la micro-informatique"],en:["Micro-Computing",      "History of micro-computing"],     url:"https://apps.apple.com/app/id6766261703" },
+  { id:"6767273597", bg:"#2d1a2d", fr:["Machines Légendaires",   "Les machines qui ont changé le monde"],en:["Legendary Machines", "Machines that changed the world"],url:"https://apps.apple.com/app/id6767273597" },
+  { id:"6767492967", bg:"#2d1a2d", fr:["Institutions Mondiales", "Les grandes institutions mondiales"],en:["World Institutions",  "The world's great institutions"], url:"https://apps.apple.com/app/id6767492967" },
+  { id:"6767810270", bg:"#2d1a2d", fr:["Îles du Monde",          "Les plus belles îles du monde"],  en:["Islands of the World",   "The world's most beautiful islands"],url:"https://apps.apple.com/app/id6767810270" },
+  { id:"6773255479", bg:"#2d1a2d", fr:["Rosiers du Monde",       "102 variétés de roses"],          en:["Roses of the World",     "102 rose varieties"],             url:"https://apps.apple.com/app/id6773255479" },
+  { id:"6762006105", bg:"#2d1a2d", fr:["Iconic Covers",          "Les pochettes d'albums mythiques"],en:["Iconic Covers",         "Legendary album covers"],         url:"https://apps.apple.com/app/id6762006105" },
+  { id:"6763069304", bg:"#2d1a2d", fr:["Avions de Légende",      "Les avions légendaires"],         en:["Legendary Planes",       "Legendary aircraft"],             url:"https://apps.apple.com/app/id6763069304" },
+  { id:"6763071567", bg:"#2d1a2d", fr:["Voitures de Légende",    "Les voitures mythiques"],         en:["Legendary Cars",         "Legendary cars"],                 url:"https://apps.apple.com/app/id6763071567" },
+  { id:"6763076110", bg:"#2d1a2d", fr:["Paquebots Liners",       "Les grands paquebots"],           en:["Ocean Liners",           "The great ocean liners"],         url:"https://apps.apple.com/app/id6763076110" },
+  // Paris
+  { id:"6760751055", bg:"#1a2d2d", fr:["Cimetières Paris",       "Guide des cimetières parisiens"], en:["Paris Cemeteries",       "Paris cemeteries guide"],         url:"https://apps.apple.com/app/id6760751055" },
+  { id:"6760890465", bg:"#1a2d2d", fr:["Musées Paris",           "Guide des musées de Paris"],      en:["Paris Museums",          "Paris museums guide"],            url:"https://apps.apple.com/app/id6760890465" },
+  { id:"6760929391", bg:"#1a2d2d", fr:["Théâtres Paris",         "Guide des théâtres parisiens"],   en:["Paris Theatres",         "Paris theatres guide"],           url:"https://apps.apple.com/app/id6760929391" },
+  { id:"6761293938", bg:"#1a2d2d", fr:["Scènes Paris",           "Les grandes scènes parisiennes"], en:["Paris Stages",           "The great Parisian stages"],      url:"https://apps.apple.com/app/id6761293938" },
+  { id:"6761335268", bg:"#1a2d2d", fr:["Panthéon Paris",         "Histoire du Panthéon"],           en:["Paris Pantheon",         "History of the Pantheon"],        url:"https://apps.apple.com/app/id6761335268" },
+  { id:"6761334922", bg:"#1a2d2d", fr:["Académie Française",     "Histoire de l'Académie française"],en:["Académie Française",    "History of the Académie française"],url:"https://apps.apple.com/app/id6761334922" },
+  { id:"6761363063", bg:"#1a2d2d", fr:["Sénat Paris",            "Histoire du Sénat"],              en:["Paris Senate",           "History of the Senate"],          url:"https://apps.apple.com/app/id6761363063" },
+  { id:"6761361079", bg:"#1a2d2d", fr:["Assemblée Paris",        "Histoire de l'Assemblée nationale"],en:["National Assembly",    "History of the National Assembly"],url:"https://apps.apple.com/app/id6761361079" },
+  { id:"6761769529", bg:"#1a2d2d", fr:["Institut de France",     "Histoire de l'Institut de France"],en:["Institut de France",    "History of the Institut de France"],url:"https://apps.apple.com/app/id6761769529" },
+  { id:"6761993002", bg:"#1a2d2d", fr:["Comédie Française",      "Histoire de la Comédie-Française"],en:["Comédie Française",     "History of the Comédie-Française"],url:"https://apps.apple.com/app/id6761993002" },
+  { id:"6761709149", bg:"#1a2d2d", fr:["Basilique Saint-Denis",  "Histoire de la Basilique"],       en:["Basilique Saint-Denis",  "History of the Basilica"],        url:"https://apps.apple.com/app/id6761709149" },
+  { id:"6763507194", bg:"#1a2d2d", fr:["Hôtels Rooftop Paris",   "Les rooftops parisiens"],         en:["Paris Rooftop Hotels",   "Parisian rooftop hotels"],        url:"https://apps.apple.com/app/id6763507194" },
+  // Monuments
+  { id:"6762618424", bg:"#0a1a2d", fr:["Ponts du Monde",         "Les plus beaux ponts du monde"],  en:["Bridges of the World",   "The world's most beautiful bridges"],url:"https://apps.apple.com/app/id6762618424" },
+  { id:"6762594201", bg:"#0a1a2d", fr:["Détroits",               "Les grands détroits du monde"],   en:["Straits of the World",   "The world's great straits"],      url:"https://apps.apple.com/app/id6762594201" },
+  { id:"6762598304", bg:"#0a1a2d", fr:["Mers & Océans",          "Les mers et océans du monde"],    en:["Seas & Oceans",          "The world's seas and oceans"],    url:"https://apps.apple.com/app/id6762598304" },
+  { id:"6762823383", bg:"#0a1a2d", fr:["Châteaux de la Loire",   "Les châteaux de la Loire"],       en:["Loire Châteaux",         "The Loire Valley châteaux"],      url:"https://apps.apple.com/app/id6762823383" },
+  { id:"6763857843", bg:"#0a1a2d", fr:["Gratte-Ciels du Monde",  "Les plus hauts gratte-ciels"],    en:["World Skyscrapers",      "The world's tallest skyscrapers"],url:"https://apps.apple.com/app/id6763857843" },
+  { id:"6764087562", bg:"#0a1a2d", fr:["Aéroports Mythiques",    "Les plus grands aéroports"],      en:["Legendary Airports",     "The world's greatest airports"],  url:"https://apps.apple.com/app/id6764087562" },
+  { id:"6762632868", bg:"#0a1a2d", fr:["Trains Mythiques",       "Les trains légendaires"],         en:["Legendary Trains",       "The world's legendary trains"],   url:"https://apps.apple.com/app/id6762632868" },
+  { id:"6761685637", bg:"#0a1a2d", fr:["Arbres de France",       "Les arbres remarquables"],        en:["Trees of France",        "Remarkable trees of France"],     url:"https://apps.apple.com/app/id6761685637" },
+  // Jeux
+  { id:"6762077646", bg:"#2d0a1a", fr:["Flip Board",             "Jeu de retournement de pions"],   en:["Flip Board",             "Reversi-style board game"],       url:"https://apps.apple.com/app/id6762077646" },
+  { id:"6762091681", bg:"#2d0a1a", fr:["Bataille Navale",        "Le classique jeu naval"],         en:["Battleship",             "Classic naval battle game"],      url:"https://apps.apple.com/app/id6762091681" },
+  { id:"6762076518", bg:"#2d0a1a", fr:["Dames Checkers",         "Jeu de dames classique"],         en:["Dames Checkers",         "Classic checkers game"],          url:"https://apps.apple.com/app/id6762076518" },
+  { id:"6769310796", bg:"#2d0a1a", fr:["App Solitaire",          "Solitaire Klondike"],             en:["App Solitaire",          "Klondike solitaire"],             url:"https://apps.apple.com/app/id6769310796" },
+  { id:"6768574161", bg:"#2d0a1a", fr:["Tuiles Numériques",      "Jeu de tuiles façon Rummikub"],   en:["Number Tiles",           "Rummikub-style tile game"],       url:"https://apps.apple.com/app/id6768574161" },
+  { id:"6762558969", bg:"#2d0a1a", fr:["ColorCodeMind",          "Jeu de déduction de couleurs"],   en:["ColorCodeMind",          "Color deduction game"],           url:"https://apps.apple.com/app/id6762558969" },
+  { id:"6762552826", bg:"#2d0a1a", fr:["Lexigo",                 "Jeu de mots"],                    en:["Lexigo",                 "Word game"],                      url:"https://apps.apple.com/app/id6762552826" },
+  { id:"6762098486", bg:"#2d0a1a", fr:["Familles Royales",       "Quiz familles royales"],          en:["Royal Families",         "Royal families quiz"],            url:"https://apps.apple.com/app/id6762098486" },
+  // Kids
+  { id:"6773000126", bg:"#1a2d0a", fr:["Coloriage Kids",         "Coloriage pour enfants"],         en:["Coloriage Kids",         "Coloring for kids"],              url:"https://apps.apple.com/app/id6773000126" },
+  { id:"6773621753", bg:"#1a2d0a", fr:["Mémo Animaux Kids",      "Mémo animaux pour enfants"],      en:["Animal Memory Kids",     "Animal memory for kids"],         url:"https://apps.apple.com/app/id6773621753" },
+  { id:"6773656650", bg:"#1a2d0a", fr:["Petit Bilingue Kids",    "Apprendre les mots en 2 langues"],en:["Petit Bilingue Kids",    "Learn words in 2 languages"],     url:"https://apps.apple.com/app/id6773656650" },
+  { id:"6773037110", bg:"#1a2d0a", fr:["Dinosaures Kids",        "Découvrir les dinosaures"],       en:["Dinosaurs Kids",         "Discover dinosaurs"],             url:"https://apps.apple.com/app/id6773037110" },
+  { id:"6772937635", bg:"#1a2d0a", fr:["Animaux Kids",           "Découvrir les animaux"],          en:["Animals Kids",           "Discover animals"],               url:"https://apps.apple.com/app/id6772937635" },
+  { id:"6772548541", bg:"#1a2d0a", fr:["Lettres Kids",           "Apprendre les lettres"],          en:["Letters Kids",           "Learn the letters"],              url:"https://apps.apple.com/app/id6772548541" },
+  { id:"6772546976", bg:"#1a2d0a", fr:["Chiffres Kids",          "Apprendre les chiffres"],         en:["Numbers Kids",           "Learn the numbers"],              url:"https://apps.apple.com/app/id6772546976" },
+  { id:"6772468506", bg:"#1a2d0a", fr:["Mahjong Kids",           "Mahjong pour enfants"],           en:["Mahjong Kids",           "Mahjong for kids"],               url:"https://apps.apple.com/app/id6772468506" },
+  // Utilitaires
+  { id:"6760126279", bg:"#1a1a1a", fr:["Cave Manager",           "Gérez votre cave à vin"],         en:["Cave Manager",           "Manage your wine cellar"],        url:"https://apps.apple.com/app/id6760126279" },
+  { id:"6759219383", bg:"#1a1a1a", fr:["Frigo Manager",          "Anti-gaspillage alimentaire"],    en:["Frigo Manager",          "Food waste prevention"],          url:"https://apps.apple.com/app/id6759219383" },
+  { id:"6761271324", bg:"#1a1a1a", fr:["MediSafe",               "Suivi de vos médicaments"],       en:["MediSafe",               "Track your medications"],         url:"https://apps.apple.com/app/id6761271324" },
+  { id:"6760617965", bg:"#1a1a1a", fr:["MesRestaurants",         "Vos restaurants favoris"],        en:["MesRestaurants",         "Your favorite restaurants"],      url:"https://apps.apple.com/app/id6760617965" },
+  { id:"1483084001", bg:"#1a1a1a", fr:["Belote Calc",            "Calculateur de belote"],          en:["Belote Calc",            "Belote score calculator"],        url:"https://apps.apple.com/app/id1483084001" },
+  { id:"1481989301", bg:"#1a1a1a", fr:["Tarots Calc",            "Calculateur de tarot"],           en:["Tarots Calc",            "Tarot score calculator"],         url:"https://apps.apple.com/app/id1481989301" },
+  { id:"6769653710", bg:"#1a1a1a", fr:["Légendes Pop",           "Les légendes de la pop"],         en:["Pop Legends",            "Legends of pop music"],           url:"https://apps.apple.com/app/id6769653710" }
 ];
+
+const thumbCache = {};
+
+async function loadPhoto(s) {
+  const imgEl = document.getElementById('modal-photo');
+  const placeholder = document.getElementById('modal-photo-placeholder');
+  imgEl.classList.remove('loaded');
+  placeholder.textContent = s.icon;
+  placeholder.style.display = 'flex';
+
+  if (!s.wt) return;
+
+  if (thumbCache[s.id]) {
+    imgEl.src = thumbCache[s.id];
+    imgEl.classList.add('loaded');
+    placeholder.style.display = 'none';
+    return;
+  }
+
+  try {
+    const r = await Capacitor.Plugins.CapacitorHttp.get({
+      url: s.wt, responseType: 'arraybuffer'
+    });
+    const mime = s.wt.endsWith('.png') ? 'image/png' : 'image/jpeg';
+    const b64 = 'data:' + mime + ';base64,' + r.data;
+    thumbCache[s.id] = b64;
+    imgEl.src = b64;
+    imgEl.classList.add('loaded');
+    placeholder.style.display = 'none';
+  } catch(e) {
+    console.log('photo error id:' + s.id, e);
+  }
+}
+
+async function loadThumb(s) {
+  if (thumbCache[s.id] || !s.wt) return;
+  try {
+    const r = await Capacitor.Plugins.CapacitorHttp.get({
+      url: s.wt, responseType: 'arraybuffer'
+    });
+    const mime = s.wt.endsWith('.png') ? 'image/png' : 'image/jpeg';
+    thumbCache[s.id] = 'data:' + mime + ';base64,' + r.data;
+    // Mettre à jour la vignette dans la liste si visible
+    const iconEl = document.getElementById('icon-' + s.id);
+    if (iconEl) {
+      iconEl.style.backgroundImage = `url('${thumbCache[s.id]}')`;
+      iconEl.style.backgroundSize = 'cover';
+      iconEl.style.backgroundPosition = 'center';
+      iconEl.classList.add('has-photo');
+    }
+  } catch(e) {}
+}
 
 let lang   = localStorage.getItem('sp_lang') || 'fr';
 let filter = 'all';
@@ -592,8 +810,12 @@ function render() {
         <span class="dot" style="background:${c.color}"></span>${c[lang]}
       </div>`;
     grouped[cat].forEach(s => {
+      const iconStyle = thumbCache[s.id]
+        ? `background-image:url('${thumbCache[s.id]}');background-color:${CATS[s.cat].color}22`
+        : `background:${CATS[s.cat].color}22`;
+      const iconClass = thumbCache[s.id] ? 'salle-icon has-photo' : 'salle-icon';
       html += `<div class="salle-card" onclick="openModal(${s.id})">
-        <div class="salle-icon" style="background:${CATS[s.cat].color}22">${s.icon}</div>
+        <div class="${iconClass}" id="icon-${s.id}" style="${iconStyle}">${s.icon}</div>
         <div class="salle-info">
           <div class="salle-name">${s[lang].nom}</div>
           <div class="salle-sub">${s[lang].type} · ${s.arr}</div>
@@ -604,6 +826,8 @@ function render() {
     html += '</div>';
   });
   listEl.innerHTML = html;
+  // Chargement lazy des vignettes
+  filtered.forEach(s => { if (s.wt && !thumbCache[s.id]) loadThumb(s); });
 }
 
 function openModal(id) {
@@ -649,6 +873,7 @@ function openModal(id) {
   btnPlans.textContent = lang === 'fr' ? '🎟️ Billetterie' : '🎟️ Book tickets';
 
   document.getElementById('modal-overlay').classList.add('open');
+  loadPhoto(s);
 }
 
 function closeModalHandle() {
@@ -663,17 +888,66 @@ function maybeCloseModal(e) {
   }
 }
 
+const APP_CATS = [
+  { key:'geo',   fr:'🌍 Géographie',      en:'🌍 Geography',       ids:['6770453028','6770458593','6770566450','6770580053','6770836826','6770857576','6770848617','6770826067'] },
+  { key:'hfr',   fr:'⚜️ Histoire France',  en:'⚜️ French History',  ids:['6761322546','6761324444','6761374601','6762542395','6768320574'] },
+  { key:'hmonde',fr:'🌐 Histoire Monde',   en:'🌐 World History',   ids:['6762208827','6762522136','6762452564','6762256169','6762263227','6768003416','6763569148'] },
+  { key:'cult',  fr:'🎨 Culture',          en:'🎨 Culture',         ids:['6768068634','6770302783','6770102339','6767135193','6766260978','6766261703','6767273597','6767492967','6767810270','6773255479','6762006105','6763069304','6763071567','6763076110'] },
+  { key:'paris', fr:'🗼 Paris',            en:'🗼 Paris',           ids:['6760751055','6760890465','6760929391','6761293938','6761335268','6761334922','6761363063','6761361079','6761769529','6761993002','6761709149','6763507194'] },
+  { key:'monum', fr:'🏛️ Monuments',        en:'🏛️ Monuments',       ids:['6762618424','6762594201','6762598304','6762823383','6763857843','6764087562','6762632868','6761685637'] },
+  { key:'jeux',  fr:'🎮 Jeux',             en:'🎮 Games',           ids:['6762077646','6762091681','6762076518','6769310796','6768574161','6762558969','6762552826','6762098486'] },
+  { key:'kids',  fr:'🧒 Kids',             en:'🧒 Kids',            ids:['6773000126','6773621753','6773656650','6773037110','6772937635','6772548541','6772546976','6772468506'] },
+  { key:'util',  fr:'🔧 Utilitaires',      en:'🔧 Utilities',       ids:['6760126279','6759219383','6761271324','6760617965','1483084001','1481989301','6769653710'] }
+];
+
 function openAppsModal() {
-  document.getElementById('apps-list').innerHTML = NOS_APPS.map(a => `
-    <div class="app-row" onclick="window.open('${a.url}','_blank')">
-      <div class="app-row-icon" style="background:${a.bg}">${a.icon}</div>
-      <div class="app-row-info">
-        <div class="app-row-name">${a[lang][0]}</div>
-        <div class="app-row-desc">${a[lang][1]}</div>
-      </div>
-      <div class="app-row-arrow">›</div>
-    </div>`).join('');
+  const appsById = {};
+  NOS_APPS.forEach(a => { appsById[a.id] = a; });
+
+  let html = '';
+  APP_CATS.forEach(cat => {
+    html += `<div class="apps-cat-title">${cat[lang]}</div>`;
+    cat.ids.forEach(id => {
+      const a = appsById[id];
+      if (!a) return;
+      html += `<div class="app-row" onclick="openAppUrl('${a.url}')">
+        <div class="app-row-icon" id="appicon-${a.id}" style="background:${a.bg}">
+          <img id="appimg-${a.id}" src="" style="display:none"/>
+        </div>
+        <div class="app-row-info">
+          <div class="app-row-name">${a[lang][0]}</div>
+          <div class="app-row-desc">${a[lang][1]}</div>
+        </div>
+        <div class="app-row-badge">
+          <div class="app-store-badge">
+            <div class="badge-sub">Available on the</div>
+            <div class="badge-main">App Store</div>
+          </div>
+        </div>
+      </div>`;
+    });
+  });
+
+  document.getElementById('apps-list').innerHTML = html;
   document.getElementById('modal-apps-overlay').classList.add('open');
+
+  // Chargement JSONP des icônes App Store
+  NOS_APPS.forEach(a => {
+    const cbName = 'itcb' + a.id;
+    window[cbName] = function(d) {
+      if (d.results && d.results[0]) {
+        const imgEl = document.getElementById('appimg-' + a.id);
+        if (imgEl) { imgEl.src = d.results[0].artworkUrl60; imgEl.style.display = 'block'; }
+      }
+    };
+    const s = document.createElement('script');
+    s.src = 'https://itunes.apple.com/lookup?id=' + a.id + '&callback=' + cbName;
+    document.body.appendChild(s);
+  });
+}
+
+function openAppUrl(url) {
+  window.open(url, '_blank');
 }
 
 function maybeCloseApps(e) {
